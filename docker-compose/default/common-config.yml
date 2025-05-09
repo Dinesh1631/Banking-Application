@@ -1,0 +1,30 @@
+services:
+#The info related to networks used in micro services
+  network-deploy-service:
+    networks:
+      - dineshbank
+
+#Info relate base config os each microservice:
+  base_microService_config:
+    extends: network-deploy-service
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+
+
+#Info relate to  microservice using the congif server
+  microservice_configServer_config:
+    extends: base_microService_config
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://ConfigServer:8071/
+      SPRING_PROFILES_ACTIVE: default
+
+
+  microservice_eureka_config:
+    extends: microservice_configServer_config
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+
+
+

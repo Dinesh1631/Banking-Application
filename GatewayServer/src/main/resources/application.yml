@@ -1,0 +1,79 @@
+spring:
+  application:
+    name: GatewayServer
+  config:
+    import: optional:configserver:http://localhost:8071/
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+      httpclient:
+        response-timeout: 2s
+        connect-timeout: 1000
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
+#server port details.
+server:
+  port: 8072
+
+#Eureka client properties:
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 172.24.48.1
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8070/eureka/ 
+
+ #Actuctor end points. 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+#Gtaewayservice information      
+info:
+  app:
+    name: "Gateway server"
+    description: "This is dinesh bank gate wayserver"
+    version: "1.0"
+
+#Enabling the debug level: 
+logging:
+  level:
+    com:
+      DineshBank:
+        Gatewayserver: debug
+        
+#resillence4j
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      sliding-window-size: 10
+      failure-rate-threshold: 50
+      permitted-number-of-calls-in-half-open-state: 2
+      wait-duration-in-open-state: 10000
+  
+       

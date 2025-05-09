@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<typeInfoHistroy>
+    <typeInfo handle="=Accounts/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.AccountService.Services{IcustomService.java[IcustomService" modifiers="513" timestamp="1742627587755"/>
+    <typeInfo handle="=Accounts/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.AccountService.Services.FeignClients{cardsFeignClient.java[cardsFeignClient" modifiers="513" timestamp="1742729568393"/>
+    <typeInfo handle="=Accounts/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.AccountService.Services.FeignClients{LoansFeignClient.java[LoansFeignClient" modifiers="513" timestamp="1742729587098"/>
+</typeInfoHistroy>

@@ -1,0 +1,134 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      timeout: 10s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+          
+  ConfigServer:
+    image: dineshhacker/config:v10
+    container_name: configServer-ms
+    ports:
+      - 8071:8071
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 10s
+      start_interval: 10s
+    extends:
+      file: common-config.yml
+      service: base_microService_config
+
+  eurekaserver:
+    image: dineshhacker/eureka:v10
+    container_name: eureka-ms
+    ports:
+      - 8070:8070
+    healthcheck:
+      test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      retries: 5
+      timeout: 10s
+      start_interval: 10s
+    extends:
+      file: common-config.yml
+      service: microservice_configServer_config
+    depends_on:
+      ConfigServer:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+
+  Accounts:
+    image: dineshhacker/account:v10
+    container_name: account-ms
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      retries: 10
+      timeout: 10s
+      start_interval: 30s
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice_eureka_config
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+
+  cards:
+    image: dineshhacker/cards:v10
+    container_name: cards-ms
+    ports:
+      - 9000:9000
+    healthcheck:
+      test: "curl --fail --silent localhost:9000/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      retries: 10
+      timeout: 10s
+      start_interval: 30s
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice_eureka_config
+    environment:
+      SPRING_APPLICATION_NAME: "cards"
+
+  loans:
+    image: dineshhacker/loans:v10
+    container_name: loan-ms
+    ports:
+      - 8090:8090
+    healthcheck:
+      test: "curl --fail --silent localhost:8090/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      retries: 10
+      timeout: 10s
+      start_interval: 30s
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice_eureka_config
+    environment:
+      SPRING_APPLICATION_NAME: "loans"
+   
+  GatewayServer:
+    image: dineshhacker/gatewayserver:v10
+    container_name : GatewayServer-ms
+    ports:
+      - 8072:8072
+    depends_on:
+      Accounts:
+        condition: service_healthy
+      cards:
+        condition: service_healthy  
+      loans:
+        condition: service_healthy 
+      redis:
+        condition: service_healthy
+    extends:
+      file: common-config.yml
+      service: microservice_eureka_config
+    environment:
+      SPRING_APPLICATION_NAME: "GatewayServer"        
+      SPRING_DATA_REDIS_CONNECT-TIMEOUT: 2s
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 1s
+networks:
+  dineshbank:
+    driver: bridge

@@ -1,0 +1,28 @@
+services:
+#The info related to networks used in micro services
+  network_service:
+    networks:
+      - dineshbank
+
+#Info relate base config os each microservice:
+  base_microService_config:
+    extends: network_service
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    environment:
+      SPRING_RABBITMQ_HOST: "rabbit"
+
+#Info relate to  microservice using the congif server
+  microservice_configServer_config:  	  
+    extends: base_microService_config
+    depends_on:
+      ConfigServer :
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healty.
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://ConfigServer:8071/
+      SPRING_PROFILES_ACTIVE: "prod"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:  http://localhost:8070/eureka/

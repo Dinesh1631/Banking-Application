@@ -1,0 +1,110 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: Dinesh
+    password: Dinesh@123
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  application:
+    name: "accounts"
+  profiles:
+    active: prod
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+#  rabbitmq:
+#    host: "localhost"
+#    port: 5672
+#    username: "guest"
+#    password: "guest"
+#enabling open figen circutbreaker for all the microservices calls.
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+ 
+           
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  endpoint:
+    shutdown:
+      access: unrestricted
+    health:
+      probes:
+        enabled: true
+      
+  
+
+#eureka relate endpoints configuration
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 172.24.48.1
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8070/eureka/
+      
+#info of the registred microservice
+info :
+  app :
+    name: "Account microsevice"
+    description: "Dineshbank account microservice"
+    version: "1.0.0"
+#Enabling the debug level: 
+logging:
+  level:
+    com:
+      DineshBank:
+        Gatewayserver: debug
+        
+#enabling the resilliance4j circute breaker.
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      sliding-window-size: 10
+      failure-rate-threshold: 50
+      permitted-number-of-calls-in-half-open-state: 2
+      wait-duration-in-open-state: 10000
+  
+      
+#enabling the resilliance4j circute breaker.
+resilience4j.retry:
+  configs:
+    default:
+      max-attempts: 3
+      wait-duration: 100
+      enable-exponential-backoff: true
+      exponential-backoff-multiplier: 2
+      ignore-exceptions:
+        - java.lang.RuntimeException
+ 
+resilience4j.ratelimiter:
+  configs:
+    default:
+      timeoutDuration: 5000
+      limitRefreshPeriod: 5000
+      limitForPeriod: 1        
